@@ -25,13 +25,13 @@ end
 
 #Pass to solvers
 prob = ODEProblem(whitedwarf, I, etaspan)
-sol = solve(prob, Tsit5())
+sol = solve(prob, Tsit5(),saveat=0.1)
 
 #Plot
 plot(sol, idxs = (0, 1), linewidth = 1, title = "White Dwarf equation", xaxis = "\\eta",
     yaxis = "\\phi", label = "\\phi")
 
-#--------------I will solve the white dwarf equation using the SecondOrderODEProblem
+#--------------I will solve the white dwarf equation using the SecondOrderODEProblem function
 
 function whitedwarf2(ddu,du,u,C,eta)
     ddu .= (-((u^2-C))^(3/2) - 2/eta * du)
@@ -46,13 +46,3 @@ eta = sol.t
 #plot
 plot!(sol2,idxs = (0, 1), linewidth=1.5, title = "White Dwarf equation", xaxis = "\\eta", yaxis="density", label = "\\phi")
 
-#Adding noise to data:
-
-x1=Array(sol)
-
-x1_mean = mean(x1, dims = 2)
-noise_magnitude = 5e-2
-x1_noise = x1 .+ (noise_magnitude*x1_mean) .* randn(eltype(x1), size(x1))
-
-plot(sol, alpha = 0.75, color = :black, label = ["True Data" nothing])
-scatter!(eta, transpose(x1_noise), color = :red, label = ["Noisy Data" nothing])
