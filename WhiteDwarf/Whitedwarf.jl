@@ -3,6 +3,7 @@ using Plots
 using DifferentialEquations
 using Random
 using Statistics
+using OrdinaryDiffEq
 rng = Random.default_rng()
 Random.seed!(99)
 
@@ -11,10 +12,10 @@ C = 0.01
 
 
 #Initial Conditions
-I = [1, 0]
+I = [1, 0]   #Psi(0)=1, Psi'(0)=1
 etaspan = (0.05, 5.325)
 
-#Define the problem
+#Define the whitedwarf equation as a function
 function whitedwarf(du, u, p, r)
     psi = u[1]
     dpsi = u[2]
@@ -23,26 +24,32 @@ function whitedwarf(du, u, p, r)
 end
 
 
-#Pass to solvers
+#Defining the Ordinary differential equation as an ODEProblem with the DifferentialEquations.jl
 prob = ODEProblem(whitedwarf, I, etaspan)
-sol = solve(prob, Tsit5(),saveat=0.1)
+#Solving the ODEProblem with the Tsit5() algorithm
+sol = solve(prob,saveat=0.1)
 
 #Plot
-plot(sol, idxs = (0, 1), linewidth = 1, title = "White Dwarf equation", xaxis = "\\eta",
-    yaxis = "\\phi", label = "\\phi")
+plot(sol, linewidth = 1, title = "White Dwarf equation", xaxis = "\\eta",
+     label = ["\\phi" "\\phi'"])
 
-#--------------I will solve the white dwarf equation using the SecondOrderODEProblem function
+#--------------I will solve the white dwarf equation using the SecondOrderODEProblem function------------
 
+#Defining the function containing the Second Order Differential Equation
 function whitedwarf2(ddu,du,u,C,eta)
-    ddu .= (-((u^2-C))^(3/2) - 2/eta * du)
+    ddu .= (-((u.*u.-C)).^(3/2) - 2/eta * du)
 end
 
-
-dpsi0=0
-psi0=1
+#Initial conditions definined as required by the syntax of the Second Order Differential Equation
+dpsi0=[0.0]
+psi0=[1.0]
+#Defining the secondOrderProblem 
 prob2 = SecondOrderODEProblem(whitedwarf2,dpsi0, psi0, etaspan, C)
-sol2 = solve(prob)
-eta = sol.t
-#plot
-plot!(sol2,idxs = (0, 1), linewidth=1.5, title = "White Dwarf equation", xaxis = "\\eta", yaxis="density", label = "\\phi")
+#Solving it with the automated choosen algorithm
+sol2 = solve(prob2, saveat=0.1)
+
+#plot sol2
+plot(sol2, linewidth=1.5, title = "White Dwarf equation", xaxis = "\\eta", label = ["\\phi" "\\phi '"])
+
+
 
