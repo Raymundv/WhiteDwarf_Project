@@ -44,7 +44,7 @@ dpsi0=[0.0]
 psi0=[1.0]
 #Defining the secondOrderProblem 
 prob2 = SecondOrderODEProblem(whitedwarf2,dpsi0, psi0, etaspan, C)
-#Solving it with the automated chosen algorithm
+#Solving it with the algorithm
 sol2 = solve(prob2, saveat=0.1)
 
 #plot sol2
@@ -58,11 +58,11 @@ plot(sol2, linewidth=1.5, title = "White Dwarf equation", xaxis = "\\eta", label
 x1=Array(sol)
 
 x1_mean = mean(x1, dims = 2)
-noise_magnitude = 30e-2
-x1_noise = x1 .+ (noise_magnitude*x1_mean) .* randn(eltype(x1), size(x1))
+noise_magnitude = 35e-2
+x1_noise = x1 .+ (noise_magnitude*x1) .* randn(eltype(x1), size(x1))
 
 plot(sol, alpha = 0.75, color = :black, label = ["True Data" nothing])
-scatter!(eta, transpose(x1_noise), color = :red, label = ["Noisy Data" nothing])
+scatter!(sol.t, transpose(x1_noise), color = :red, label = ["Noisy Data" nothing])
 
 
-#ode_data += randn(size(ode_data)) .* ode_data .* noise
+
