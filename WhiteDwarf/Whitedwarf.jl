@@ -4,6 +4,10 @@ using DifferentialEquations
 using Random
 using Statistics
 using OrdinaryDiffEq
+using Lux 
+using DiffEqFlux
+using ComponentArrays 
+using Optimization, OptimizationOptimJL,OptimizationOptimisers                                                                   
 rng = Random.default_rng()
 Random.seed!(99)
 
@@ -14,6 +18,10 @@ C = 0.01
 #Initial Conditions
 I = [1, 0]   #Psi(0)=1, Psi'(0)=1
 etaspan = (0.05, 5.325)
+
+#radius range
+datasize= 100
+etasteps = range(etaspan[1], etaspan[2]; length = datasize)
 
 #Define the whitedwarf equation as a function
 function whitedwarf(du, u, p, r)
@@ -27,7 +35,7 @@ end
 #Defining the Ordinary differential equation as an ODEProblem with the DifferentialEquations.jl
 prob = ODEProblem(whitedwarf, I, etaspan)
 #Solving the ODEProblem with the Tsit5() algorithm
-sol = solve(prob,saveat=0.1)
+sol = solve(prob,saveat=etasteps)
 
 #Plot
 plot(sol, linewidth = 1, title = "White Dwarf equation", xaxis = "\\eta",
@@ -46,10 +54,75 @@ psi0=[1.0]
 #Defining the secondOrderProblem 
 prob2 = SecondOrderODEProblem(whitedwarf2,dpsi0, psi0, etaspan, C)
 #Solving it with the automated choosen algorithm
-sol2 = solve(prob2, saveat=0.1)
+sol2 = solve(prob2, saveat=etasteps)
 
 #plot sol2
 plot(sol2, linewidth=1.5, title = "White Dwarf equation", xaxis = "\\eta", label = ["\\phi" "\\phi '"])
 
 
+#-------------------------------------Defining the Neural ODE------------------------------------
 
+
+dudt2 = Lux.Chain(Lux.Dense(2, 80, tanh),Lux.Dense(80, 80, tanh), Lux.Dense(80, 2))
+#Setting up the NN parameters randomly using the rng instance
+p, st = Lux.setup(rng, dudt2)
+
+
+prob_neuralode = NeuralODE(dudt2, etaspan, Tsit5(); saveat = etasteps)
+
+function predict_neuralode(p)
+    Array(prob_neuralode(I, p, st)[1])
+end
+
+true_data= Array(sol)
+### Define loss function as the difference between actual ground truth data and Neural ODE prediction
+function loss_neuralode(p)
+    pred = predict_neuralode(p)
+    loss = sum(abs2, true_data .- pred)
+    return loss, pred
+end
+
+
+callback = function (p, l, pred; doplot = true)
+    println(l)
+    # plot current prediction against data
+    if doplot
+
+        plt1 = scatter(sol.t, true_data[1, :]; label = "data")
+        scatter!(plt1, sol.t, pred[1, :]; label = "prediction")
+        scatter!(sol.t, true_data[2, :]; label = "data")
+        scatter!(plt1, sol.t, pred[2, :]; label = "prediction")
+        #plt1 = scatter(sol.t, true_data[3, :]; label = "data")
+        #scatter!(plt1, sol.t, pred[3, :]; label = "prediction")
+        #plt=plot(plt1, plt2)
+
+        display(plot(plt1))
+
+        
+        
+    end
+    return false
+end
+
+
+pinit = ComponentArray(p)
+callback(pinit, loss_neuralode(pinit)...; doplot = true)
+
+
+
+
+# use Optimization.jl to solve the problem
+adtype = Optimization.AutoZygote()
+
+optf = Optimization.OptimizationFunction((x, p) -> loss_neuralode(x), adtype)
+optprob = Optimization.OptimizationProblem(optf, pinit)
+
+result_neuralode = Optimization.solve(optprob, OptimizationOptimisers.Adam(0.1); callback = callback,
+    maxiters = 80)
+
+optprob2 = remake(optprob; u0 = result_neuralode.u)
+
+result_neuralode2 = Optimization.solve(optprob2, Optim.BFGS(; initial_stepnorm = 0.01);
+    callback, allow_f_increases = false, maxiters=100)
+
+callback(result_neuralode2.u, loss_neuralode(result_neuralode2.u)...; doplot = true)
