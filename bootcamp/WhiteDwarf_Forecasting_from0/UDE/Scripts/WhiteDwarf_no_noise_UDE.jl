@@ -87,8 +87,8 @@ end
 solutionarray = Array(sol)
 # Defining the UDE problem
 etasteps2=etasteps[1:end-10]
-etaspan = (etasteps2[1],etasteps[2])
-prob_NN = ODEProblem(ude_dynamics,solutionarray[:,1], etaspan, p)
+etaspan2 = (etasteps2[1],etasteps2[end])
+prob_NN = ODEProblem(ude_dynamics,solutionarray[:,1], etaspan2, p)
 
 #-------------------------Implementing the training routines-------------------------
 eta=sol.t[1:end-10]
@@ -162,7 +162,7 @@ X̂ = predictude(p_trained, solutionarray[:,1], etasteps2)
 # Plot the UDE approximation for  the WhiteDwarf model
 pl_trajectory = plot(etasteps2, transpose(X̂), xlabel = "\\eta (dimensionless radius)", color = :red, label = ["UDE Approximation" nothing])
 # Producing a scatter plot for the ground truth data 
-scatter!(etasteps2, transpose(training_array), color = :blue,markeralpha=0.4, label = ["Ground truth data" nothing])
+scatter!(etasteps2, transpose(training_array), color = :blue,markeralpha=0.4, label = ["Training data" nothing])
 savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0\\UDE\\Results\\NoNoise\\trainedUDEvsODE90points.png")
 
 
@@ -170,5 +170,50 @@ savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf
 #----------------------------------------------------#
 #----------------------------------------------------#
 #----------------------------------------------------#
-function recovered_dynamics!(du,u,p,t)
+function recovered_dynamics!(du,u,p,eta)
+    phi, phiderivative = u
+    output, _ = U([phi,phiderivative],res1.minimizer,st)
+    du[1] = output[1]+phiderivative
+    du[2] = -2*phiderivative/eta+output[2]
+
+    #output, _ = dudt2([phi,phiderivative],p,st)
+
     
+end
+
+
+etaspan = (0.05, 5.325)
+
+#radius range
+datasize= 100
+etasteps = range(etaspan2[1], etaspan2[end]; length = datasize)
+
+
+
+#UDE prediction
+prob_node_extrapolate = ODEProblem(recovered_dynamics!,I, etaspan)
+_sol_node = solve(prob_node_extrapolate, Tsit5(),saveat = etasteps)
+
+#UDE Extrapolation scatter plot
+predicted_ude_plot = scatter(_sol_node, legend = :topright,markeralpha=0.5, label=["UDE \\phi" "UDE \\phi'"], title="UDE Extrapolation")
+#UDE trained against training data
+pl_trajectory = plot!(etasteps2, transpose(X̂), xlabel = "\\eta (dimensionless radius)", color = :red, label = ["UDE Approximation" nothing])
+
+
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0\\UDE\\Results\\NoNoise\\trainedUDE90points_vsforecasted_ude.png")
+
+
+
+
+# Producing a scatter plot for the ground truth data 
+scatter(sol, color = :blue,markeralpha=0.3, label = ["Ground truth ODE data" nothing])
+scatter!(_sol_node, legend = :topright,markeralpha=1,markershape=:hline,color=:black, label=["UDE \\phi" "UDE \\phi'"], title="UDE Extrapolation")
+xlabel!("\\eta (dimensionless radius)")
+#saving 4th figure
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0\\UDE\\Results\\NoNoise\\UDE_Forecasted_vsODE_groundtruth_data.png")
+
+
+
+
+
+
