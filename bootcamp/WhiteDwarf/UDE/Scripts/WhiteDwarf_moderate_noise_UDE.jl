@@ -20,7 +20,7 @@ C = 0.01
 
 
 #Initial Conditions
-I = [1, 0]   #Psi(0)=1, Psi'(0)=1
+I = [1.0, 0.0]   #Psi(0)=1, Psi'(0)=1
 etaspan = (0.05, 5.325)
 
 #radius range
@@ -100,7 +100,7 @@ end
 
 
 # Defining the UDE problem
-prob_NN = ODEProblem(ude_dynamics,x1_noise[:,1], etaspan, p)
+prob_NN = ODEProblem(ude_dynamics,I, etaspan, p)
 
 
 
@@ -111,7 +111,7 @@ prob_NN = ODEProblem(ude_dynamics,x1_noise[:,1], etaspan, p)
 
 ## Function to train the network (the predictor)
 
-function predict(theta, X = x1_noise[:,1], T = eta)
+function predict(theta, X = I, T = eta)
     _prob = remake(prob_NN, u0 = X, tspan = (T[1], T[end]), p = theta)
     Array(solve(_prob, Vern7(), saveat = T,
                 abstol=1e-6, reltol=1e-6,
@@ -166,16 +166,19 @@ savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf
 # Retrieving the best candidate after the BFGS training.
 p_trained = res1.minimizer
 
+#p_trained = (layer_1 = (weight = [-0.727893842030321 0.13718895950316035; -2.6392009187557726 -1.047837279360003; -2.9767324365373056 -4.338257593448761; -0.4947748264989609 -0.4190833214193289; -2.429146863856118 -2.6985999512748675], bias = [-0.946731243747013; -2.291023618688338; 1.5024091879218837; -0.7425884469046468; 0.1808207728658995]), layer_2 = (weight = [-1.486054159990248 -0.8841407935796622 -3.3825210651832576 -2.0443829941366642 -1.906514949419884; -0.09163625404597203 -0.8691386502607134 -0.733684460675513 -0.5222152846746821 -1.404615824875155; 1.691866525053132 1.9157281173612482 1.9254491090344483 1.5085474809481485 0.6435184622659548; -2.0017585641958546 -1.0252344059876697 -1.828357334575395 -1.4107799646391646 -1.2048112743811372; 1.2711568308379073 1.6959119329418428 2.439661537757485 1.127813572508265 1.2394641382536775], bias = [2.1927081192085414; 0.012453707001215763; 1.5106146606937287; -1.3422224913406786; 2.368620794421298]), layer_3 = (weight = [1.7323931031409627 2.9212579490832624 2.7468942998526664 1.8311887852027546 0.7150504709832053; 1.672543905479793 0.24478999322930586 1.513386828624444 1.3940710938315009 0.7995225076919362; -2.37062346329752 -1.7587401749598668 -1.0991076143624576 -2.191340817246448 -2.0184013380253054; 2.9316359534847645 -0.6548528113140013 -1.2210032243176803 1.119256372358662 1.224769444814523; -0.7688564158152941 -4.124608888676817 -0.8310785157972209 -1.1714237973376354 -0.9305793164526106], bias = [0.8948778213240715; 3.4825280107548062; -1.8698112079447373; 1.1242843738218182; -0.7517543307533492]), layer_4 = (weight = [1.8520325018141501 -0.5430596862639577 -0.07470148717229236 -0.4968973661792778 -1.289380411439508; -0.05253881604643106 0.156937517343783 0.8782616991273586 0.4521136217355267 1.936620717118169], bias = [0.06376589094710307; -0.8960839995622831]))
+open("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf\\UDE\\Trained_parameters\\p_minimized_moderatenoise.txt","w") do f
 
-
+    write(f, string(res1.minimizer))
+end
 # defining the time span for the plot
 
 
 #Retrieving the Data predicted for the Lotka Volterra model, with the UDE with the trained parameters for the NN
-X̂ = predict(p_trained, x1_noise[:,1], etasteps)
+X̂ = predict(p_trained, I, etasteps)
 
 # Plot the UDE approximation for  the Lotka Volterra model
-pl_trajectory = plot(etasteps, transpose(X̂), xlabel = "\\eta (dimensionless radius)", color = :red, label = ["UDE Approximation" nothing])
+pl_trajectory = plot(etasteps, transpose(X̂),title="Trained UDE", xlabel = "\\eta (dimensionless radius)", color = :red, label = ["UDE Approximation" nothing])
 # Producing a scatter plot for the ground truth data 
-scatter!(sol.t, transpose(x1_noise), color = :black,markeralpha=0.4, label = ["Ground truth data" nothing])
+scatter!(sol.t, transpose(x1_noise), color = :black,markeralpha=0.4, label = ["Ground truth noisy data" nothing])
 savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf\\UDE\\Results\\UDEvsODE_moderate_noise")

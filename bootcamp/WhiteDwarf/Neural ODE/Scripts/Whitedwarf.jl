@@ -130,10 +130,10 @@ callback = function (p, l, pred; doplot = true)
         # plot current prediction against data
     if doplot
     
-        plt1 = scatter(sol.t, true_data[1, :],color = :blue,markeralpha=0.4; label = "\\phi data")
-        scatter!(plt1, sol.t, pred[1, :],markershape = :xcross; label = "\\phi prediction")
+        plt1 = scatter(sol.t, true_data[1, :],color = :blue,title="Trained Neural ODE",markeralpha=0.4; label = "\\phi data")
+        scatter!(plt1, sol.t, pred[1, :],markershape = :xcross; label = "\\phi predicted")
         scatter!(plt1, sol.t, true_data[2, :],color = :red,markeralpha=0.4; label = "\\phi' data")
-        scatter!(plt1, sol.t, pred[2, :],markershape=:xcross,color= :black; label = "\\phi' prediction")
+        scatter!(plt1, sol.t, pred[2, :],markershape=:xcross,color= :black; label = "\\phi' predicted")
             #plt1 = scatter(sol.t, true_data[3, :]; label = "data")
             #scatter!(plt1, sol.t, pred[3, :]; label = "prediction")
             #plt=plot(plt1, plt2)
@@ -146,11 +146,15 @@ callback = function (p, l, pred; doplot = true)
     return false
 end
     
+open("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf\\Neural ODE\\Trained_parameters\\p_minimized_nonoise.txt","w") do f
 
+    write(f, string(result_neuralode2.minimizer))
+end
 
 callback(result_neuralode2.u, loss_neuralode(result_neuralode2.u)...; doplot = true)
-
+#p=res.minimizer
+#callback(p, loss_neuralode(p)...; doplot = true)
+#
 xlabel!("\\eta (dimensionless radius)")
-
 
 savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf\\Neural ODE\\Results\\Whitedwarf_no_noise_ODE.png")

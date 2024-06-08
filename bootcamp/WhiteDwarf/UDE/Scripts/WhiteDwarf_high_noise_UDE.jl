@@ -20,7 +20,7 @@ C = 0.01
 
 
 #Initial Conditions
-I = [1, 0]   #Psi(0)=1, Psi'(0)=1
+I = [1.0, 0.0]   #Psi(0)=1, Psi'(0)=1
 etaspan = (0.05, 5.325)
 
 #radius range
@@ -96,7 +96,7 @@ end
 
 
 # Defining the UDE problem
-prob_NN = ODEProblem(ude_dynamics,x1_noise[:,1], etaspan, p)
+prob_NN = ODEProblem(ude_dynamics,I, etaspan, p)
 
 #-------------------------Implementing the training routines-------------------------
 
@@ -104,7 +104,7 @@ prob_NN = ODEProblem(ude_dynamics,x1_noise[:,1], etaspan, p)
 
 ## Function to train the network (the predictor)
 
-function predict(theta, X = x1_noise[:,1], T = eta)
+function predict(theta, X = I, T = eta)
     _prob = remake(prob_NN, u0 = X, tspan = (T[1], T[end]), p = theta)
     Array(solve(_prob, Vern7(), saveat = T,
                 abstol=1e-6, reltol=1e-6,
@@ -147,7 +147,7 @@ println("Training loss after $(length(losses)) iterations: $(losses[end])")
 #Refined training with BFGS
 
 optprob1 = Optimization.OptimizationProblem(optf, res.minimizer)
-res1 = Optimization.solve(optprob1, Optim.BFGS(initial_stepnorm=0.01), callback=callback, maxiters = 1000)
+res1 = Optimization.solve(optprob1, Optim.BFGS(initial_stepnorm=0.006), callback=callback, maxiters = 1000)
 println("Training loss after $(length(losses)) iterations: $(losses[end])")
 
 
@@ -155,20 +155,26 @@ println("Training loss after $(length(losses)) iterations: $(losses[end])")
 pl_losses = plot(1:300, losses[1:300], yaxis = :log10, xaxis = :log10, xlabel = "Iterations", ylabel = "Loss", label = "ADAM", color = :blue)
 #Plot the losses for the BFGS routine
 plot!(301:length(losses), losses[301:end], yaxis = :log10, xaxis = :log10, xlabel = "Iterations", ylabel = "Loss", label = "BFGS", color = :red)
-savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf\\UDE\\Results\\losses_high_noise.png")
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf\\UDE\\Results\\losses_high_noise2.png")
 # Retrieving the best candidate after the BFGS training.
 p_trained = res1.minimizer
 
 
 
-# defining the time span for the plot
+open("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf\\UDE\\Trained_parameters\\p_minimized_highnoise2.txt","w") do f
+
+    write(f, string(res1.minimizer))
+end
+
 
 
 #Retrieving the Data predicted for the Lotka Volterra model, with the UDE with the trained parameters for the NN
-X̂ = predict(p_trained, x1_noise[:,1], etasteps)
+X̂ = predict(p_trained, I, etasteps)
 
 # Plot the UDE approximation for  the Lotka Volterra model
-pl_trajectory = plot(etasteps, transpose(X̂), xlabel = "\\eta (dimensionless radius)", color = :red, label = ["UDE Approximation" nothing])
+pl_trajectory = plot(etasteps, transpose(X̂),title="Trained UDE", xlabel = "\\eta (dimensionless radius)", color = :red, label = ["UDE Approximation" nothing])
 # Producing a scatter plot for the ground truth data 
-scatter!(sol.t, transpose(x1_noise), color = :black,markeralpha=0.4, label = ["Ground truth data" nothing])
-savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf\\UDE\\Results\\UDEvsODE_high_noise.png")
+scatter!(sol.t, transpose(x1_noise), color = :black,markeralpha=0.4, label = ["Ground truth noisy data" nothing])
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf\\UDE\\Results\\UDEvsODE_high_noise2.png")
+#PRevious version was with  Optim.BFGS(initial_stepnorm=0.01)
+#Previous version

@@ -3,6 +3,11 @@ using Plots
 using DifferentialEquations
 using Random
 using Statistics
+using OrdinaryDiffEq
+using Lux 
+using DiffEqFlux
+using ComponentArrays 
+using Optimization, OptimizationOptimJL, OptimizationOptimisers                                                                   
 rng = Random.default_rng()
 Random.seed!(99)
 
@@ -97,10 +102,10 @@ callback = function (p, l, pred; doplot = true)
     # plot current prediction against data
     if doplot
 
-        plt1 = scatter(sol.t, true_data[1, :]; label = "\\phi data")
-        scatter!(plt1, sol.t, pred[1, :]; label = "\\phi prediction")
+        plt1 = scatter(sol.t, true_data[1, :],title="Trained Neural ODE"; label = "\\phi data")
+        scatter!(plt1, sol.t, pred[1, :]; label = "\\phi predicted")
         scatter!(plt1, sol.t, true_data[2, :]; label = "\\phi' data")
-        scatter!(plt1, sol.t, pred[2, :]; label = "\\phi' prediction")
+        scatter!(plt1, sol.t, pred[2, :]; label = "\\phi' predicted")
         #plt1 = scatter(sol.t, true_data[3, :]; label = "data")
         #scatter!(plt1, sol.t, pred[3, :]; label = "prediction")
         #plt=plot(plt1, plt2)
@@ -135,7 +140,13 @@ result_neuralode2 = Optimization.solve(optprob2, Optim.BFGS(; initial_stepnorm =
     callback, allow_f_increases = false, maxiters=100)
 
 callback(result_neuralode2.u, loss_neuralode(result_neuralode2.u)...; doplot = true)
+open("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf\\Neural ODE\\Trained_parameters\\p_minimized_moderatenoise.txt","w") do f
 
+    write(f, string(result_neuralode2.minimizer))
+end
+
+p=result_neuralode2.minimizer
+callback(p, loss_neuralode(p)...; doplot = true)
 
 xlabel!("\\eta (dimensionless radius)")
 
