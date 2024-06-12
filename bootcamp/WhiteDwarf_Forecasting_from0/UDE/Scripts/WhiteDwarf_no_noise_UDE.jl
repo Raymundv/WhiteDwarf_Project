@@ -152,10 +152,15 @@ savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf
 p_trained = res1.minimizer
 
 
+#Saving p_trained for future usage:
 
+open("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0\\UDE\\Trained_parameters\\p_minimized_nonoise.txt","w") do f
+
+    write(f, string(res1.minimizer))
+end
 # defining the time span for the plot
-
-
+#implementation of saved p_trained
+#p_trained= (layer_1 = (weight = [-0.5914239534866671 -0.12770954089560196; -1.6070369072917845 -0.44245515762800564; -2.4712942739551975 1.1118877430465188; -0.7616332347538572 -1.2060673538996178; 1.318559745587085 -0.14990379393890124], bias = [-0.6334809883945558; -1.0088972605924476; -1.983207841187539; -0.43961441554230724; 1.1666684331014607]), layer_2 = (weight = [0.09562745177399481 0.5174448392528295 -0.8760761051043906 -1.1425452818059387 -0.2464861975181729; 2.043243679586581 1.4536359995135788 0.9094087802399894 1.833006335607427 0.995677046387276; 1.1235385845592747 -0.6805807729047443 -0.3850544478759506 1.3735081262162343 -0.18703819207601377; 1.7131465199152054 1.0582879989376486 0.5980178339750114 1.740286457907272 1.0510009526590338; 0.8825404444455105 1.9440473280508488 1.8895856012975267 1.690059017369644 1.7304100201658927], bias = [0.004656292846577479; 1.6205467951584012; -0.24053553244243153; 1.7899702781324425; 0.2736590585332426]), layer_3 = (weight = [-0.6742941047861514 0.10724929193429811 0.5362797196901873 -0.781577000757492 1.2148775831875176; 1.7105404061977547 1.935338034334163 1.5274962568011754 1.688008504766943 0.7347188785577593; 1.1332514941991276 0.5612931181246403 1.0418858793772148 1.31945010524704 0.75618876657712; 0.8211536503184711 1.4335990009057107 0.2889710409353576 0.2962492034171797 1.6716248706128445; 1.6741626159628524 1.4343704183334411 1.1924310383920635 1.4947586946894378 1.0531370265816813], bias = [-0.4596572201044409; 1.1957717558681744; 0.5168382920997338; 0.5147669273584408; 1.5582827135169408]), layer_4 = (weight = [-0.006147408209046018 -0.2455734080972964 0.03178579014964978 -0.017901843008801974 -1.059489776713348; -1.1324533748217742 -0.31757158914124306 1.443676638574256 0.6562009168047263 -1.2948698293096494], bias = [0.006117786549485974; 0.13476322299608134]))
 #Retrieving the Data predicted for the WhiteDwarf Volterra model, with the UDE with the trained parameters for the NN
 X̂ = predictude(p_trained, solutionarray[:,1], etasteps2)
 
@@ -186,7 +191,7 @@ etaspan = (0.05, 5.325)
 
 #radius range
 datasize= 100
-etasteps = range(etaspan2[1], etaspan2[end]; length = datasize)
+etasteps = range(etaspan[1], etaspan[end]; length = datasize)
 
 
 
@@ -214,6 +219,24 @@ savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf
 
 
 
+#Final plot for the results- better formated
+plot(sol.t[1:end-10],Array(sol[:,1:end-10])[1,:],color=:blue, linewidth = 1, xaxis = "\\eta",
+     label = "Training \\phi ", title="White Dwarf model")
 
+plot!(sol.t[1:end-10],Array(sol[:,1:end-10])[2,:],color=:blue, linewidth = 1, xaxis = "\\eta",
+     label = "Training \\phi'")
+xlabel!("\\eta (dimensionless radius)")
+
+#Trained Phi NODE
+scatter!(collect(etasteps[1:end-10]), predictude(p_trained, solutionarray[:,1], etasteps2)[1, :],color=:blue,markeralpha=0.3; label = "Predicted \\phi")
+
+scatter!(collect(etasteps[1:end-10]), predictude(p_trained, solutionarray[:,1], etasteps2)[2, :],color=:blue, markeralpha=0.3;label = "Predicted \\phi'")
+scatter!(sol.t[end-9:end],_sol_node[1,end-9:end],color=:orange,markeralpha=0.6,label="Forecasted \\phi")
+
+scatter!(sol.t[end-9:end],_sol_node[2, end-9:end],color=:orange,markeralpha=0.6,label="Forecasted \\phi'")
+
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0\\UDE\\Results\\NoNoise\\Whitedwarf_forecasted_modelUDE.png")
+
+#Second version
 
 

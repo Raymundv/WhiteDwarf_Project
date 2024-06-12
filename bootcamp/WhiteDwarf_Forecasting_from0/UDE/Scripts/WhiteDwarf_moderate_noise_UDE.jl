@@ -215,7 +215,7 @@ predicted_ude_plot = scatter(_sol_node, legend = :topright,markeralpha=0.5, labe
 pl_trajectory = plot!(etasteps2, transpose(X̂), xlabel = "\\eta (dimensionless radius)", color = :red, label = ["UDE Approximation" nothing])
 
 
-savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0\\UDE\\Results\\NoNoise\\trainedUDE90points_vsforecasted_ude.png")
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0\\UDE\\Results\\ModerateNoise\\trainedUDE90points_vsforecasted_ude.png")
 
 
 
@@ -225,5 +225,5 @@ scatter(sol, color = :blue,markeralpha=0.3, label = ["Ground truth ODE data" not
 scatter!(_sol_node, legend = :topright,markeralpha=1,markershape=:hline,color=:black, label=["UDE \\phi" "UDE \\phi'"], title="UDE Extrapolation")
 xlabel!("\\eta (dimensionless radius)")
 #saving 4th figure
-savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0\\UDE\\Results\\NoNoise\\UDE_Forecasted_vsODE_groundtruth_data.png")
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0\\UDE\\Results\\ModerateNoise\\UDE_Forecasted_vsODE_groundtruth_data.png")
 

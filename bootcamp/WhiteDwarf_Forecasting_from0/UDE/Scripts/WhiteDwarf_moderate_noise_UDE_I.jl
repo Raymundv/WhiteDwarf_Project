@@ -20,7 +20,7 @@ C = 0.01
 
 
 #Initial Conditions
-I = [1, 0]   #Psi(0)=1, Psi'(0)=1
+I = [1.0, 0.0]   #Psi(0)=1, Psi'(0)=1
 etaspan = (0.05, 5.325)
 
 #radius range
@@ -105,7 +105,7 @@ etaspan2 = (etasteps2[1],etasteps2[end])
 
 
 # Defining the UDE problem
-prob_NN = ODEProblem(ude_dynamics,x1_noise[:,1], etaspan2, p)
+prob_NN = ODEProblem(ude_dynamics,I, etaspan2, p)
 
 
 
@@ -116,7 +116,7 @@ prob_NN = ODEProblem(ude_dynamics,x1_noise[:,1], etaspan2, p)
 
 ## Function to train the network (the predictor)
 eta=sol.t[1:end-10]
-function predict_ude(theta, X = x1_noise[:,1], T = eta)
+function predict_ude(theta, X = I, T = eta)
     _prob = remake(prob_NN, u0 = X, tspan = (T[1], T[end]), p = theta)
     Array(solve(_prob, Vern7(), saveat = T,
                 abstol=1e-6, reltol=1e-6,
@@ -169,23 +169,26 @@ println("Training loss after $(length(losses)) iterations: $(losses[end])")
 pl_losses = plot(1:300, losses[1:300], yaxis = :log10, xaxis = :log10, xlabel = "Iterations", ylabel = "Loss", label = "ADAM", color = :blue)
 #Plot the losses for the BFGS routine
 plot!(301:length(losses), losses[301:end], yaxis = :log10, xaxis = :log10, xlabel = "Iterations", ylabel = "Loss", label = "BFGS", color = :red)
-savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0\\UDE\\Results\\ModerateNoise\\losses_moderate_noise.png")
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0\\UDE\\Results\\ModerateNoise\\losses_moderate_noise2I.png")
 # Retrieving the best candidate after the BFGS training.
 p_trained = res1.minimizer
 
 
 
 # defining the time span for the plot
+open("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0\\UDE\\Trained_parameters\\p_minimized_moderatenoise.txt","w") do f
 
+    write(f, string(p_trained))
+end
 
-#Retrieving the Data predicted for the Lotka Volterra model, with the UDE with the trained parameters for the NN
-X̂ = predict_ude(p_trained, x1_noise[:,1], etasteps2)
+#Retrieving the Data predicted for the White Dwarf model, with the UDE with the trained parameters for the NN
+X̂ = predict_ude(p_trained)
 
-# Plot the UDE approximation for  the Lotka Volterra model
+# Plot the UDE approximation for  the White Dwarf model
 pl_trajectory = scatter(etasteps2, transpose(X̂),markeralpha=0.4, xlabel = "\\eta (dimensionless radius)", color = :red, label = ["UDE Approximation" nothing])
 # Producing a scatter plot for the ground truth noisy data 
 scatter!(etasteps2, transpose(training_array),title="Trained UDE vs Noisy Data", color = :black,markeralpha=0.4, label = ["Noisy data" nothing])
-savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0\\UDE\\Results\\ModerateNoise\\UDE_trainedvsData_moderate_noise")
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0\\UDE\\Results\\ModerateNoise\\UDE_trainedvsData_moderate_noiseI.png")
 
 
 #--------------------forecasting---------------------#
@@ -206,8 +209,8 @@ end
 
 
 #UDE prediction
-prob_node_extrapolate = ODEProblem(recovered_dynamics!,I, etaspan)
-_sol_node = solve(prob_node_extrapolate, Tsit5(),saveat = etasteps)
+prob_node_extrapolate = ODEProblem(recovered_dynamics!,I, etaspan,p_trained)
+_sol_node = solve(prob_node_extrapolate, Tsit5(),abstol=1e-15, reltol=1e-15,saveat = etasteps)
 
 #UDE Extrapolation scatter plot
 predicted_ude_plot = scatter(_sol_node, legend = :topright,markeralpha=0.5, label=["UDE \\phi" "UDE \\phi'"], title="UDE Extrapolation")
@@ -215,15 +218,45 @@ predicted_ude_plot = scatter(_sol_node, legend = :topright,markeralpha=0.5, labe
 pl_trajectory = plot!(etasteps2, transpose(X̂), xlabel = "\\eta (dimensionless radius)", color = :red, label = ["UDE Approximation" nothing])
 
 
-savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0\\UDE\\Results\\NoNoise\\trainedUDE90points_vsforecasted_ude.png")
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0\\UDE\\Results\\ModerateNoise\\trainedUDE90points_vsforecasted_udeI.png")
 
 
 
 
-# Producing a scatter plot for the ground truth data 
+# Producing a scatter plot for the ground truth noisy data 
+scatter(etasteps,transpose(x1_noise), color = :blue,markeralpha=0.5, label = ["Ground truth Noisy data" nothing])
+scatter!(_sol_node, legend = :topright,markeralpha=0.2,color=:red, label=["UDE \\phi" "UDE \\phi'"], title="UDE Extrapolation")
+xlabel!("\\eta (dimensionless radius)")
+
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0\\UDE\\Results\\ModerateNoise\\UDE_Forecasted_vsNoisy_groundtruth_dataI.png")
+
+# Producing a scatter plot for the ground truth ODE data 
 scatter(sol, color = :blue,markeralpha=0.3, label = ["Ground truth ODE data" nothing])
-scatter!(_sol_node, legend = :topright,markeralpha=1,markershape=:hline,color=:black, label=["UDE \\phi" "UDE \\phi'"], title="UDE Extrapolation")
+scatter!(_sol_node, legend = :topright,markeralpha=0.5,color=:red, label=["UDE \\phi" "UDE \\phi'"], title="UDE Extrapolation")
 xlabel!("\\eta (dimensionless radius)")
 #saving 4th figure
-savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0\\UDE\\Results\\NoNoise\\UDE_Forecasted_vsODE_groundtruth_data.png")
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0\\UDE\\Results\\ModerateNoise\\UDE_Forecasted_vsODE_groundtruth_data.png")
 
+
+#plot()
+
+#Final Plot
+scatter(sol.t[1:end-10],Array(x1_noise[:,1:end-10])[1,:],color=:blue,markershape=:cross, linewidth = 1, xaxis = "\\eta",
+     label = "Training \\phi ", title="White Dwarf model")
+
+scatter!(sol.t[1:end-10],Array(x1_noise[:,1:end-10])[2,:],color=:blue,markershape=:cross, linewidth = 1, xaxis = "\\eta",
+     label = "Training \\phi'")
+xlabel!("\\eta (dimensionless radius)")
+
+#Trained Phi NODE
+scatter!(collect(etasteps[1:end-10]), X̂[1,:],color=:blue,markeralpha=0.3; label = "Predicted \\phi")
+
+scatter!(collect(etasteps[1:end-10]), X̂[2,:],color=:blue, markeralpha=0.3;label = "Predicted \\phi'")
+scatter!(sol.t[end-9:end],_sol_node[1,end-9:end],color=:orange,markeralpha=0.6,label="Forecasted \\phi")
+
+scatter!(sol.t[end-9:end],_sol_node[2, end-9:end],color=:orange,markeralpha=0.6,label="Forecasted \\phi'")
+
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0\\UDE\\Results\\ModerateNoise\\Whitedwarf_forecasted_modelUDE_Finalplot.png")
+
+#Second version
+#plot!(_sol_node)

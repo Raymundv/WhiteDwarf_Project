@@ -185,6 +185,12 @@ savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf
 #------------------------------------------------------
 
 #------------------------------------------------------
+open("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0\\Neural ODE\\Trained_parameters\\p_minimized_highnoise.txt","w") do f
+
+    write(f, string(result_neuralode2.minimizer))
+end
+
+
 
 
 function dudt_node(u,p,t)
@@ -214,12 +220,12 @@ p_neuralode = scatter(_sol_node, legend = :topright,markeralpha=0.5, label=["Neu
 #Trained (predicted) DATA up to the 90 elements with the Neural ODE.
 p=result_neuralode2.minimizer
 prob_neuralode = NeuralODE(dudt2,etaspan; saveat = etasteps)
-predict=(prob_neuralode(I, p, st)[1])
+prediction=(prob_neuralode(I, p, st)[1])
 
 #Plot
-scatter!(collect(etasteps), predict[1, :],color=:black,markershape=:hline; label = "\\phi prediction")
+scatter!(collect(etasteps), prediction[1, :],color=:black,markershape=:hline; label = "\\phi prediction")
 xlabel!("\\eta")
-scatter!(collect(etasteps), predict[2, :],color=:black,markershape=:cross; label = "\\phi ' prediction")
+scatter!(collect(etasteps), prediction[2, :],color=:black,markershape=:cross; label = "\\phi ' prediction")
 savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0\\Neural ODE\\Results\\HighNoise\\WhitedwarfNODEpredictionvspredictedtrainingdata.png")
 
 
@@ -243,3 +249,24 @@ scatter!(sol, linewidth = 1,markershape=:cross, xaxis = "\\eta",
 
 
 savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0\\Neural ODE\\Results\\HighNoise\\Whitedwarf_NODE_forecastedvsGroundTruthDataNoNoise_ODE.png")     
+
+
+#Final plot for the results- better formated
+scatter(sol.t[1:end-10],Array(x1_noise[:,1:end-10])[1,:],color=:blue,markershape=:cross, linewidth = 1, xaxis = "\\eta",
+     label = "Training \\phi ", title="White Dwarf model")
+
+scatter!(sol.t[1:end-10],Array(x1_noise[:,1:end-10])[2,:],color=:blue,markershape=:cross, linewidth = 1, xaxis = "\\eta",
+     label = "Training \\phi'")
+xlabel!("\\eta (dimensionless radius)")
+
+#Trained Phi NODE
+scatter!(collect(etasteps), prediction[1, :],color=:blue,markeralpha=0.3; label = "Predicted \\phi")
+
+scatter!(collect(etasteps), prediction[2, :],color=:blue, markeralpha=0.3;label = "Predicted \\phi' ")
+scatter!(sol.t[end-9:end],_sol_node[1,end-9:end],color=:orange,markeralpha=0.6,label="Forecasted \\phi")
+
+scatter!(sol.t[end-9:end],_sol_node[2, end-9:end],color=:orange,markeralpha=0.6,label="Forecasted \\phi'")
+
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0\\Neural ODE\\Results\\HighNoise\\Whitedwarf_forecasted_model.png")
+
+#Second version
