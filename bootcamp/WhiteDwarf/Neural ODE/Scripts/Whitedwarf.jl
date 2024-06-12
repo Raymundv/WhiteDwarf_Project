@@ -130,7 +130,7 @@ callback = function (p, l, pred; doplot = true)
         # plot current prediction against data
     if doplot
     
-        plt1 = scatter(sol.t, true_data[1, :],color = :blue,title="Trained Neural ODE",markeralpha=0.4; label = "\\phi data")
+        plt1 = scatter(sol.t, true_data[1, :],color = :blue,title="Trained Neural ODE",markeralpha=0.30; label = "\\phi data")
         scatter!(plt1, sol.t, pred[1, :],markershape = :xcross; label = "\\phi predicted")
         scatter!(plt1, sol.t, true_data[2, :],color = :red,markeralpha=0.4; label = "\\phi' data")
         scatter!(plt1, sol.t, pred[2, :],markershape=:xcross,color= :black; label = "\\phi' predicted")
