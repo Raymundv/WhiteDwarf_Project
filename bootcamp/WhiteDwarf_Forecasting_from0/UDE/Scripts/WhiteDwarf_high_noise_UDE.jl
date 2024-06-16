@@ -204,6 +204,11 @@ function recovered_dynamics!(du,u,p,eta)
 end
 
 
+open("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0\\UDE\\Trained_parameters\\p_minimized_highnoise.txt","w") do f
+
+    write(f, string(res1.minimizer))
+end
+
 
 #UDE prediction
 prob_node_extrapolate = ODEProblem(recovered_dynamics!,I, etaspan,p)
@@ -234,3 +239,21 @@ xlabel!("\\eta (dimensionless radius)")
 #saving 4th figure
 savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0\\UDE\\Results\\HighNoise\\UDE_Forecasted_vsODE_groundtruth_dataI.png")
 
+
+#Final Plot
+scatter(sol.t[1:end-10],Array(x1_noise[:,1:end-10])[1,:],color=:blue,markershape=:cross, linewidth = 1, xaxis = "\\eta",
+     label = "Training \\phi ", title="White Dwarf model")
+
+scatter!(sol.t[1:end-10],Array(x1_noise[:,1:end-10])[2,:],color=:blue,markershape=:cross, linewidth = 1, xaxis = "\\eta",
+     label = "Training \\phi'")
+xlabel!("\\eta (dimensionless radius)")
+
+#Trained Phi NODE
+scatter!(collect(etasteps[1:end-10]), X̂[1,:],color=:blue,markeralpha=0.3; label = "Predicted \\phi")
+
+scatter!(collect(etasteps[1:end-10]), X̂[2,:],color=:blue, markeralpha=0.3;label = "Predicted \\phi'")
+scatter!(sol.t[end-9:end],_sol_node[1,end-9:end],color=:orange,markeralpha=0.6,label="Forecasted \\phi")
+
+scatter!(sol.t[end-9:end],_sol_node[2, end-9:end],color=:orange,markeralpha=0.6,label="Forecasted \\phi'")
+
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0\\UDE\\Results\\HighNoise\\Whitedwarf_forecasted_modelUDE_Finalplot.png")
