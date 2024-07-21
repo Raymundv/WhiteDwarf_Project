@@ -177,8 +177,18 @@ end
 #Retrieving the Data predicted for the Lotka Volterra model, with the UDE with the trained parameters for the NN
 X̂ = predict(p_trained, I, etasteps)
 
-# Plot the UDE approximation for  the Lotka Volterra model
-pl_trajectory = plot(etasteps, transpose(X̂),title="Trained UDE", xlabel = "\\eta (dimensionless radius)", color = :red, label = ["UDE Approximation" nothing])
+# Plot the UDE approximation for  the a model
+#pl_trajectory = plot(etasteps, transpose(X̂),title="Trained UDE", xlabel = "\\eta (dimensionless radius)", color = :red, label = ["UDE Approximation" nothing])
+
+# Plot the UDE approximation for  the White Dwarf equation
+pl_trajectory = scatter(etasteps, transpose(X̂)[:,1],title="Trained UDE", xlabel = "\\eta (dimensionless radius)", label = "\\phi data")
+                scatter!(etasteps, transpose(X̂)[:,2],color = :red,markeralpha=0.4,label = "\\phi' data")
 # Producing a scatter plot for the ground truth data 
+scatter!(sol.t, solutionarray[1, :],markershape = :xcross,color= :red; label = "\\phi predicted")
+scatter!(sol.t, solutionarray[2, :],markershape=:xcross,color= :black; label = "\\phi' predicted")
+xlabel!("\\eta (dimensionless radius)")
+
+# Producing a scatter plot for the ground truth data 
+
 scatter!(sol.t, transpose(x1_noise), color = :black,markeralpha=0.4, label = ["Ground truth noisy data" nothing])
 savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf\\UDE\\Results\\UDEvsODE_moderate_noise")

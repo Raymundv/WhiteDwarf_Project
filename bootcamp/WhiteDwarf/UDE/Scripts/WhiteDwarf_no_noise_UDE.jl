@@ -161,7 +161,16 @@ end
 X̂ = predict(p_trained, solutionarray[:,1], etasteps)
 
 # Plot the UDE approximation for  the White Dwarf equation
-pl_trajectory = plot(etasteps, transpose(X̂),title="Trained UDE", xlabel = "\\eta (dimensionless radius)", color = :red, label = ["UDE Approximation" nothing])
+pl_trajectory = scatter(etasteps, transpose(X̂)[:,1],title="Trained UDE", xlabel = "\\eta (dimensionless radius)", color = :blue, markeralpha=0.30, label = "Training \\phi")
+                scatter!(etasteps, transpose(X̂)[:,2],color = :red,markeralpha=0.4,label = "Training \\phi'")
 # Producing a scatter plot for the ground truth data 
-scatter!(sol.t, transpose(solutionarray), color = :blue,markeralpha=0.4, label = ["Ground truth data" nothing])
-savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf\\UDE\\Results\\UDEvsODE_no_noise")
+scatter!(sol.t, solutionarray[1, :],markershape = :xcross,color= :red; label = "\\phi predicted")
+scatter!(sol.t, solutionarray[2, :],markershape=:xcross,color= :black; label = "\\phi' predicted")
+xlabel!("\\eta (dimensionless radius)")
+
+
+#scatter!(sol.t, transpose(solutionarray), color = :blue,markeralpha=0.4, label = ["Ground truth data" nothing])
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf\\UDE\\Results\\UDEvsODE_no_noise_better")
+
+#Iproduced the new plot
+#savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf\\UDE\\Results\\UDEvsODE_no_noise_better_formated")
