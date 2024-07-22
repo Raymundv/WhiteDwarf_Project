@@ -86,12 +86,12 @@ end
 
 solutionarray = Array(sol)
 # Defining the UDE problem
-etasteps2=etasteps[1:end-20]
+etasteps2=etasteps[1:end-80]
 etaspan2 = (etasteps2[1],etasteps2[end])
 prob_NN = ODEProblem(ude_dynamics,solutionarray[:,1], etaspan2, p)
 
 #-------------------------Implementing the training routines-------------------------
-eta=sol.t[1:end-20]
+eta=sol.t[1:end-80]
 
 
 ## Function to train the network (the predictor)
@@ -104,7 +104,7 @@ function predictude(theta, X = solutionarray[:,1], T = eta)
                 ))
 end
 
-training_array=solutionarray[:,1:end-20]
+training_array=solutionarray[:,1:end-80]
 # Defining the L2 loss, that will be minimized
 function loss(theta) 
     X̂ = predictude(theta)
@@ -147,14 +147,14 @@ println("Training loss after $(length(losses)) iterations: $(losses[end])")
 pl_losses = plot(1:300, losses[1:300], yaxis = :log10, xaxis = :log10, xlabel = "Iterations", ylabel = "Loss", label = "ADAM", color = :blue)
 #Plot the losses for the BFGS routine
 plot!(301:length(losses), losses[301:end], yaxis = :log10, xaxis = :log10, xlabel = "Iterations", ylabel = "Loss", label = "BFGS", color = :red)
-savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0_80points\\UDE\\Results\\NoNoise\\losses_no_noise.png")
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0_20points\\UDE\\Results\\NoNoise\\losses_no_noise.png")
 # Retrieving the best candidate after the BFGS training.
 p_trained = res1.minimizer
 
 
 #Saving p_trained for future usage:
 
-open("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0_80points\\UDE\\Trained_parameters\\p_minimized_nonoise.txt","w") do f
+open("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0_20points\\UDE\\Trained_parameters\\p_minimized_nonoise.txt","w") do f
 
     write(f, string(res1.minimizer))
 end
@@ -168,7 +168,7 @@ X̂ = predictude(p_trained, solutionarray[:,1], etasteps2)
 pl_trajectory = plot(etasteps2, transpose(X̂), xlabel = "\\eta (dimensionless radius)", color = :red, label = ["UDE Approximation" nothing])
 # Producing a scatter plot for the ground truth data 
 scatter!(etasteps2, transpose(training_array), color = :blue,markeralpha=0.4, label = ["Training data" nothing])
-savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0_80points\\UDE\\Results\\NoNoise\\trainedUDEvsODE90points.png")
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0_20points\\UDE\\Results\\NoNoise\\trainedUDEvsODE20points.png")
 
 
 #--------------------forecasting---------------------#
@@ -205,7 +205,7 @@ predicted_ude_plot = scatter(_sol_node, legend = :topright,markeralpha=0.5, labe
 pl_trajectory = plot!(etasteps2, transpose(X̂), xlabel = "\\eta (dimensionless radius)", color = :red, label = ["UDE Approximation" nothing])
 
 
-savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0_80points\\UDE\\Results\\NoNoise\\trainedUDE90points_vsforecasted_ude.png")
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0_20points\\UDE\\Results\\NoNoise\\trainedUDE90points_vsforecasted_ude.png")
 
 
 
@@ -215,27 +215,27 @@ scatter(sol, color = :blue,markeralpha=0.3, label = ["Ground truth ODE data" not
 scatter!(_sol_node, legend = :topright,markeralpha=1,markershape=:hline,color=:black, label=["UDE \\phi" "UDE \\phi'"], title="UDE Extrapolation")
 xlabel!("\\eta (dimensionless radius)")
 #saving 4th figure
-savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0_80points\\UDE\\Results\\NoNoise\\UDE_Forecasted_vsODE_groundtruth_data.png")
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0_20points\\UDE\\Results\\NoNoise\\UDE_Forecasted_vsODE_groundtruth_data.png")
 
 
 
 #Final plot for the results- better formated
-plot(sol.t[1:end-20],Array(sol[:,1:end-20])[1,:],color=:blue, linewidth = 1, xaxis = "\\eta",
+plot(sol.t[1:end-80],Array(sol[:,1:end-80])[1,:],color=:blue, linewidth = 1, xaxis = "\\eta",
      label = "Training \\phi ", title="White Dwarf model")
 
-plot!(sol.t[1:end-20],Array(sol[:,1:end-20])[2,:],color=:blue, linewidth = 1, xaxis = "\\eta",
+plot!(sol.t[1:end-80],Array(sol[:,1:end-80])[2,:],color=:blue, linewidth = 1, xaxis = "\\eta",
      label = "Training \\phi'")
 xlabel!("\\eta (dimensionless radius)")
 
 #Trained Phi NODE
-scatter!(collect(etasteps[1:end-20]), predictude(p_trained, solutionarray[:,1], etasteps2)[1, :],color=:blue,markeralpha=0.3; label = "Predicted \\phi")
+scatter!(collect(etasteps[1:end-80]), predictude(p_trained, solutionarray[:,1], etasteps2)[1, :],color=:blue,markeralpha=0.3; label = "Predicted \\phi")
 
-scatter!(collect(etasteps[1:end-20]), predictude(p_trained, solutionarray[:,1], etasteps2)[2, :],color=:blue, markeralpha=0.3;label = "Predicted \\phi'")
-scatter!(sol.t[end-19:end],_sol_node[1,end-19:end],color=:orange,markeralpha=0.6,label="Forecasted \\phi")
+scatter!(collect(etasteps[1:end-80]), predictude(p_trained, solutionarray[:,1], etasteps2)[2, :],color=:blue, markeralpha=0.3;label = "Predicted \\phi'")
+scatter!(sol.t[end-79:end],_sol_node[1,end-79:end],color=:orange,markeralpha=0.6,label="Forecasted \\phi")
 
-scatter!(sol.t[end-19:end],_sol_node[2, end-19:end],color=:orange,markeralpha=0.6,label="Forecasted \\phi'")
-
-savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0_80points\\UDE\\Results\\NoNoise\\Whitedwarf_forecasted_modelUDE.png")
+scatter!(sol.t[end-79:end],_sol_node[2, end-79:end],color=:orange,markeralpha=0.6,label="Forecasted \\phi'")
+title!("Trained UDE")
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0_20points\\UDE\\Results\\NoNoise\\Whitedwarf_forecasted_modelUDE.png")
 
 #Second version
 
