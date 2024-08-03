@@ -150,7 +150,7 @@ end
 #------------------------------------------------------
 
 #------------------------------------------------------
-
+p_trained = result_neuralode2.minimizer
 
 function dudt_node(u,p,t)
     phi, phiderivative = u
@@ -171,13 +171,14 @@ etasteps2 = range(etaspan2[1], etaspan2[2]; length = datasize)
 
 
 #Neural ODE prediction implementation
-prob_node_extrapolate = ODEProblem(dudt_node,I, etaspan2, result_neuralode2.minimizer)
+prob_node_extrapolate = ODEProblem(dudt_node,I, etaspan2, p_trained)
 _sol_node = solve(prob_node_extrapolate,saveat = collect(etasteps2))
 #Neural ODE Extrapolation scatter plot
 p_neuralode = scatter(_sol_node, legend = :topright,markeralpha=0.5, label=["NeuralODE \\phi" "NeuralODE \\phi'"], title="Neural ODE Extrapolation")
 
 #Trained (predicted) DATA up to the 90 elements with the Neural ODE, retrieving. Same as callback.
 p=result_neuralode2.minimizer
+p=p_trained
 prob_neuralode = NeuralODE(dudt2,etaspan; saveat = etasteps)
 predicted=(prob_neuralode(I, p, st)[1])
 
@@ -239,3 +240,23 @@ scatter!(sol.t[end-79:end],Array(sol)[1,end-79:end],color=:black, markershape=:h
 title!("Trained Neural ODE")
 scatter!(sol.t[end-79:end],Array(sol)[2,end-79:end],color=:black, markershape=:cross,label="ODE \\phi'")
 savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0_20points\\Neural ODE\\Results\\NoNoise\\Whitedwarf_forecasted_model_ODEVersion.png")
+
+
+# Final actual Plot for the preprint
+scatter(sol.t[1:end-80],Array(sol[:,1:end-80])[1,:],color=:blue,markeralpha=0.3, linewidth = 1, xaxis = "\\eta",
+     label = "Training \\phi ", title="White Dwarf model")
+
+
+scatter!(sol.t[end-79:end],Array(sol[:,21:end])[1,:], color=:red,markeralpha=0.3, label = "Testing \\phi")
+
+plot!(sol.t[1:end-80],predicted[1, :] ,color=:blue,markeralpha=0.3; label = "Predicted \\phi")
+xlabel!("\\eta (dimensionless radius)")
+
+plot!(sol.t[end-80:end],_sol_node[1,end-80:end],color=:red,markeralpha=0.30,label="Forecasted \\phi")
+title!("Trained Neural ODE")
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0_20points\\Neural ODE\\Results\\NoNoise\\NeuralODEModel_finalversion.png")
+
+
+
+
+

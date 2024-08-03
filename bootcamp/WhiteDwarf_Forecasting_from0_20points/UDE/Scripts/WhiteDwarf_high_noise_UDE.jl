@@ -178,6 +178,7 @@ p_trained = res1.minimizer
 # defining the time span for the plot
 
 
+#p_trained = (layer_1 = (weight = [-1.8193159452164203 2.744073559928421; 1.8114828090663073 -2.824422799463003; -1.1871640793049103 0.1991819345565677; -1.9797832626046368 -1.274215682796942; -2.9797708415831488 -0.5704117339668496], bias = [-1.9753779669633234; 1.8315393640754296; -1.819746187913108; -1.2626804101770939; -2.157606056595257]), layer_2 = (weight = [-1.656996600323156 -1.0219355838381443 -2.4718419206721456 -1.9329616455713972 -1.590472057068167; 2.2899365632163615 1.5408609121100554 1.3239409821240542 0.8208608706629149 1.9876863575368522; 0.7363991094295163 1.305363764437111 -0.6198462602084744 0.7490730937937635 -0.15184425974692353; -0.012629502432272646 0.8725598564012396 -0.6364575074541449 0.23592389370334638 0.058425763341647126; 0.9121718146070315 1.2519985935044466 1.2542535069996472 0.819289787390472 0.7079388404595489], bias = [-1.623987413618985; 1.5413492780932259; -0.03380050160553218; 0.036630168215904216; 0.6782680019010362]), layer_3 = (weight = [1.9759394170174651 1.5395373068511884 1.7051080679882484 2.1932001329092166 1.195254885897714; -1.59460929730924 -1.0080664788216198 -2.3001334835338882 -2.334234455912098 -2.550182176191753; -2.554137033554578 -1.7721260902612217 -2.0789249193115116 -2.777366494470448 -2.7829394649623036; 1.7240012209562932 0.7872925611487056 1.5973228673486781 1.2533588035800738 1.1714516173926828; -0.9949778922259092 -1.52495466337609 -1.5605743559688732 -1.5867058292853926 -1.4617828914896809], bias = [1.6111057626333802; -2.2011852385946535; -2.235313483555916; 1.303586508751524; -1.4244039633051124]), layer_4 = (weight = [0.2868896085245463 -1.3326704793504212 -0.9387036268390881 0.5881310032855239 -0.4237699378572846; -0.9862025525458352 -1.5063592971174946 -1.1699786455554597 -0.0042641372604034205 -0.772597586415812], bias = [0.1539669615205976; -0.7738596664851816]))
 #Retrieving the Data predicted for the Lotka Volterra model, with the UDE with the trained parameters for the NN
 X̂ = predict_ude(p_trained)
 
@@ -194,7 +195,7 @@ savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf
 #----------------------------------------------------#
 function recovered_dynamics!(du,u,p,eta)
     phi, phiderivative = u
-    output, _ = U([phi,phiderivative],res1.minimizer,st)
+    output, _ = U([phi,phiderivative],p_trained,st)
     du[1] = output[1]+phiderivative
     du[2] = -2*phiderivative/eta+output[2]
 
@@ -266,3 +267,21 @@ savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf
 
 
 # I changed to 800 hundred, due to the jumpings
+
+#Final plot for the preprint 
+
+#Last Version for the preprint
+
+
+scatter(sol.t[1:end-80],Array(x1_noise[:,1:end-80])[1,:],color=:blue,markeralpha=0.3, linewidth = 1, xaxis = "\\eta",
+     label = "Training \\phi ", title="White Dwarf model")
+
+
+scatter!(sol.t[end-79:end],Array(x1_noise[:,21:end])[1,:], color=:red,markeralpha=0.3, label = "Testing \\phi")
+
+plot!(sol.t[1:end-80],predict_ude(p_trained, solutionarray[:,1], etasteps2)[1, :],color=:blue,markeralpha=0.3; label = "Predicted \\phi")
+xlabel!("\\eta (dimensionless radius)")
+
+plot!(sol.t[end-80:end],_sol_node[1,end-80:end],color=:red,markeralpha=0.30,label="Forecasted \\phi")
+title!("Trained UDE")
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0_20points\\UDE\\Results\\HighNoise\\NeuralODEModel_finalversion.png")

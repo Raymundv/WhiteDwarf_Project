@@ -173,7 +173,7 @@ savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf
 # Retrieving the best candidate after the BFGS training.
 p_trained = res1.minimizer
 
-
+#p_trained = (layer_1 = (weight = [-1.515046736889739 1.4715772245693186; 1.9507636663125953 -1.81919361098221; 1.9741221996818683 -3.105294964440201; -1.9861456160038335 -1.3341902677042572; -2.3196710788532724 -1.3141409876454335], bias = [-1.7009749646935068; 1.96924157671041; 1.5840826658275742; -1.2892093947163747; -1.62795547478631]), layer_2 = (weight = [-1.435798790881446 -0.8316900125628542 -2.621142900182773 -1.7434279879516832 -1.4676339792139204; 2.0221397314834757 1.2896904786093069 1.1279923279444743 0.6056373331287483 1.8168063091135749; 1.2276024883059222 1.5273511314003574 -0.3394648956520416 0.9287920293454501 0.16159006532292622; -0.23006365041096238 0.805252974672616 -0.6202532290513828 0.19449927962559055 0.054752332478146405; 0.8597793608644825 1.2749792765350365 1.4861472782766112 0.8618851045804071 0.8958020391415344], bias = [-1.2998022689030984; 1.2149796845617464; 0.12663167074773385; 0.11531064684559203; 0.9941531984358769]), layer_3 = (weight = [1.9644601943042648 1.5555751393452593 1.7214386074199188 2.1828031625701114 1.1630394508835613; -1.4749083790428377 -1.2269016088568667 -2.1671288479950443 -2.3791057620358793 -2.819832468474865; -2.8253562552994262 -2.5253283406358484 -2.247845776437411 -2.9588069378969912 -2.9559184852763627; 1.8235031874765784 0.8066004884151378 1.1700424233636308 1.2095351916379218 1.34988273982248; -1.005832355106733 -1.5626995845676028 -1.5886445244325216 -1.595982580866825 -1.4766526613506339], bias = [1.604507356776649; -2.285230568154275; -2.564351269966508; 1.4023711470007345; -1.441890740374194]), layer_4 = (weight = [-0.37588249359197706 -1.4681420713897797 -1.0097507230318084 0.28950046371967686 -0.709842213486935; -1.0084995840033157 -1.5228515612249625 -1.1729265656229195 -0.17645659041616316 -0.7864599917335807], bias = [0.02241619536226371; -0.8038770606255771]))
 
 # defining the time span for the plot
 open("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0_20points\\UDE\\Trained_parameters\\p_minimized_moderatenoise.txt","w") do f
@@ -197,7 +197,7 @@ savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf
 #----------------------------------------------------#
 function recovered_dynamics!(du,u,p,eta)
     phi, phiderivative = u
-    output, _ = U([phi,phiderivative],res1.minimizer,st)
+    output, _ = U([phi,phiderivative],p_trained,st)
     du[1] = output[1]+phiderivative
     du[2] = -2*phiderivative/eta+output[2]
 
@@ -258,8 +258,20 @@ scatter!(sol.t[end-79:end],_sol_node[2, end-79:end],color=:orange,markeralpha=0.
 title!("Trained UDE")
 savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0_20points\\UDE\\Results\\ModerateNoise\\Whitedwarf_forecasted_modelUDE.png")
 
-#Second version
+#Final version for the preprint 
+
+#Last Version for the preprint
 
 
+scatter(sol.t[1:end-80],Array(x1_noise[:,1:end-80])[1,:],color=:blue,markeralpha=0.3, linewidth = 1, xaxis = "\\eta",
+     label = "Training \\phi ", title="White Dwarf model")
 
-#plot!(_sol_node)
+
+scatter!(sol.t[end-79:end],Array(x1_noise[:,21:end])[1,:], color=:red,markeralpha=0.3, label = "Testing \\phi")
+
+plot!(sol.t[1:end-80],predict_ude(p_trained, solutionarray[:,1], etasteps2)[1, :],color=:blue,markeralpha=0.3; label = "Predicted \\phi")
+xlabel!("\\eta (dimensionless radius)")
+
+plot!(sol.t[end-80:end],_sol_node[1,end-80:end],color=:red,markeralpha=0.30,label="Forecasted \\phi")
+title!("Trained UDE")
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0_20points\\UDE\\Results\\ModerateNoise\\NeuralODEModel_finalversion.png")
