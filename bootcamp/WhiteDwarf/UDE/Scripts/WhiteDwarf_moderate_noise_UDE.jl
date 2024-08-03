@@ -174,6 +174,8 @@ end
 # defining the time span for the plot
 
 
+
+
 #Retrieving the Data predicted for the Lotka Volterra model, with the UDE with the trained parameters for the NN
 X̂ = predict(p_trained, I, etasteps)
 
@@ -192,3 +194,35 @@ xlabel!("\\eta (dimensionless radius)")
 
 scatter!(sol.t, transpose(x1_noise), color = :black,markeralpha=0.4, label = ["Ground truth noisy data" nothing])
 savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf\\UDE\\Results\\UDEvsODE_moderate_noise")
+
+
+
+
+
+#Final plot for the preprint 
+#Last Version for the preprint
+
+#----------------------------------
+
+
+
+
+scatter(sol.t,Array(x1_noise[:,1:end])[1,:],color=:blue,markeralpha=0.3, linewidth = 1, xaxis = "\\eta",
+     label = "Training \\phi ", title="White Dwarf model")
+
+scatter!(sol.t,Array(x1_noise[:,1:end])[2,:],color=:blue,markeralpha=0.3, linewidth = 1,markershape=:diamond, xaxis = "\\eta",
+     label = "Training \\phi' ", title="Trained UDE")
+
+
+#scatter!(sol.t[1:end],Array(sol[:,1:end])[1,:], color=:red,markeralpha=0.3, label = "Testing \\phi")
+
+plot!(sol.t[1:end],X̂[1, :],color=:black,markeralpha=0.3; label = "Predicted \\phi")
+xlabel!("\\eta (dimensionless radius)")
+
+
+
+
+plot!(sol.t[end-99:end],X̂[2, :],color=:black,linestyle=:dash,label="Predicted \\phi'")
+title!("Trained UDE")
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf\\UDE\\Results\\NeuralODEModel_finalversion_moderatenoise.png")
+

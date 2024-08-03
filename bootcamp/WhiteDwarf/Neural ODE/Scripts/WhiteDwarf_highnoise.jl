@@ -156,3 +156,32 @@ xlabel!("\\eta (dimensionless radius)")
 
 
 savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf\\Neural ODE\\Results\\Whitedwarf_high_noise_ODE.png")
+
+
+#Final plot for the preprint 
+#Last Version for the preprint
+
+#----------------------------------
+
+
+
+
+scatter(sol.t,Array(x1_noise[:,1:end])[1,:],color=:blue,markeralpha=0.3, linewidth = 1, xaxis = "\\eta",
+     label = "Training \\phi ", title="White Dwarf model")
+
+scatter!(sol.t,Array(x1_noise[:,1:end])[2,:],color=:blue,markeralpha=0.3, linewidth = 1,markershape=:diamond, xaxis = "\\eta",
+     label = "Training \\phi' ", title="Trained Neural ODE")
+
+
+#scatter!(sol.t[1:end],Array(sol[:,1:end])[1,:], color=:red,markeralpha=0.3, label = "Testing \\phi")
+
+plot!(sol.t[1:end],predict_neuralode(p_trained)[1, :],color=:black,markeralpha=0.3; label = "Predicted \\phi")
+xlabel!("\\eta (dimensionless radius)")
+
+
+
+
+plot!(sol.t[end-99:end],predict_neuralode(p_trained)[2, :],color=:black,linestyle=:dash,label="Predicted \\phi'")
+title!("Trained Neural ODE")
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf\\Neural ODE\\Results\\NeuralODEModel_finalversion_highnoise.png")
+

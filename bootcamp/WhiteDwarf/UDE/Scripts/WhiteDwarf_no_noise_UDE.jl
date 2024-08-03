@@ -157,7 +157,10 @@ open("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf\\U
     write(f, string(res1.minimizer))
 end
 
-#Retrieving the Data predicted for the Lotka Volterra model, with the UDE with the trained parameters for the NN
+
+
+
+#Retrieving the Data predicted for the White Dwarf model, with the UDE with the trained parameters for the NN
 X̂ = predict(p_trained, solutionarray[:,1], etasteps)
 
 # Plot the UDE approximation for  the White Dwarf equation
@@ -174,3 +177,34 @@ savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf
 
 #Iproduced the new plot
 #savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf\\UDE\\Results\\UDEvsODE_no_noise_better_formated")
+
+
+
+
+#Final plot for the preprint 
+#Last Version for the preprint
+
+#----------------------------------
+
+
+
+
+scatter(sol.t,Array(sol[:,1:end])[1,:],color=:blue,markeralpha=0.3, linewidth = 1, xaxis = "\\eta",
+     label = "Training \\phi ", title="White Dwarf model")
+
+scatter!(sol.t,Array(sol[:,1:end])[2,:],color=:blue,markeralpha=0.3, linewidth = 1,markershape=:diamond, xaxis = "\\eta",
+     label = "Training \\phi' ", title="Trained Neural ODE")
+
+
+#scatter!(sol.t[1:end],Array(sol[:,1:end])[1,:], color=:red,markeralpha=0.3, label = "Testing \\phi")
+
+plot!(sol.t[1:end],X̂[1,:],color=:black,markeralpha=0.3; label = "Predicted \\phi")
+xlabel!("\\eta (dimensionless radius)")
+
+
+
+
+plot!(sol.t[end-99:end],X̂[2, :],color=:black,linestyle=:dash,label="Predicted \\phi'")
+title!("Trained UDE")
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf\\UDE\\Results\\NeuralODEModel_finalversion_nonoise.png")
+
