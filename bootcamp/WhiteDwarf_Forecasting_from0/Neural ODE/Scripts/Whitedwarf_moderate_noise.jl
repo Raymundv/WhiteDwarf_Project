@@ -192,6 +192,9 @@ open("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Fo
 end
 
 
+p = p_trained
+
+
 function dudt_node(u,p,t)
     phi, phiderivative = u
    
@@ -211,7 +214,7 @@ etasteps2 = range(etaspan2[1], etaspan2[2]; length = datasize)
 
 
 #Neural ODE prediction
-prob_node_extrapolate = ODEProblem(dudt_node,I, etaspan2, result_neuralode2.minimizer)
+prob_node_extrapolate = ODEProblem(dudt_node,I, etaspan2, p_trained)
 _sol_node = solve(prob_node_extrapolate, Tsit5(),saveat = collect(etasteps2))
 #Neural ODE Extrapolation scatter plot
 p_neuralode = scatter(_sol_node, legend = :topright,markeralpha=0.5, label=["NeuralODE \\phi" "NeuralODE \\phi'"], title="Neural ODE Extrapolation")
@@ -268,4 +271,22 @@ scatter!(sol.t[end-9:end],_sol_node[2, end-9:end],color=:orange,markeralpha=0.6,
 
 savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0\\Neural ODE\\Results\\ModerateNoise\\Whitedwarf_forecasted_model.png")
 
-#Second version
+#Final version for the preprint 
+
+#Last Version for the preprint
+
+#----------------------------------
+
+scatter(sol.t[1:end-10],Array(x1_noise[:,1:end-10])[1,:],color=:blue,markeralpha=0.3, linewidth = 1, xaxis = "\\eta",
+     label = "Training \\phi ", title="White Dwarf model")
+
+
+scatter!(sol.t[end-09:end],Array(x1_noise[:,91:end])[1,:], color=:red,markeralpha=0.3, label = "Testing \\phi")
+
+plot!(sol.t[1:end-10],prediction[1, :],color=:blue,markeralpha=0.3; label = "Predicted \\phi")
+xlabel!("\\eta (dimensionless radius)")
+
+plot!(sol.t[end-10:end],_sol_node[1,end-10:end],color=:red,markeralpha=0.30,label="Forecasted \\phi")
+title!("Trained Neural ODE")
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0\\Neural ODE\\Results\\ModerateNoise\\NeuralODEModel_finalversion.png")
+
