@@ -54,6 +54,7 @@ end
 
 #Initial conditions definined as required by the syntax of the Second Order Differential Equation
 dpsi0=[0.0]
+
 psi0=[1.0]
 #Defining the secondOrderProblem 
 prob2 = SecondOrderODEProblem(whitedwarf2,dpsi0, psi0, etaspan, C)
@@ -175,6 +176,9 @@ p_trained = res1.minimizer
 
 
 
+
+
+
 # defining the time span for the plot
 open("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0_80points\\UDE\\Trained_parameters\\p_minimized_moderatenoise.txt","w") do f
 
@@ -197,7 +201,7 @@ savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf
 #----------------------------------------------------#
 function recovered_dynamics!(du,u,p,eta)
     phi, phiderivative = u
-    output, _ = U([phi,phiderivative],res1.minimizer,st)
+    output, _ = U([phi,phiderivative],p_trained,st)
     du[1] = output[1]+phiderivative
     du[2] = -2*phiderivative/eta+output[2]
 
@@ -258,7 +262,26 @@ scatter!(sol.t[end-19:end],_sol_node[2, end-19:end],color=:orange,markeralpha=0.
 
 savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0_80points\\UDE\\Results\\ModerateNoise\\Whitedwarf_forecasted_modelUDE.png")
 
-#Second version
+#Final plot for the preprint 
+
+#Last Version for the preprint
+
+#----------------------------------
+scatter(sol.t[1:end-20],Array(x1_noise[:,1:end-20])[1,:],color=:blue,markeralpha=0.3, linewidth = 1, xaxis = "\\eta",
+     label = "Training \\phi ", title="White Dwarf model")
+
+
+scatter!(sol.t[end-19:end],Array(x1_noise[:,81:end])[1,:], color=:red,markeralpha=0.3, label = "Testing \\phi")
+
+plot!(sol.t[1:end-20],predict_ude(p_trained, solutionarray[:,1], etasteps2)[1, :],color=:blue,markeralpha=0.3; label = "Predicted \\phi")
+xlabel!("\\eta (dimensionless radius)")
+
+plot!(sol.t[end-20:end],_sol_node[1,end-20:end],color=:red,markeralpha=0.30,label="Forecasted \\phi")
+title!("Trained UDE")
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0_80points\\UDE\\Results\\ModerateNoise\\NeuralODEModel_finalversion.png")
+
+
+
 
 
 
