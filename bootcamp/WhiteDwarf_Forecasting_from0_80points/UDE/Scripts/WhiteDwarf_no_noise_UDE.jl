@@ -10,7 +10,7 @@ using ComponentArrays
 using Optimization, OptimizationOptimJL,OptimizationOptimisers   
 using JLD
 using OptimizationFlux
-
+using LaTeXStrings
 using Statistics                                                                
 rng = Random.default_rng()
 Random.seed!(99)
@@ -153,7 +153,7 @@ p_trained = res1.minimizer
 
 #p_trained = (layer_1 = (weight = [-1.1143660766262544 -0.36611705855786186; -1.7519205534665814 -0.9109177462877476; -2.3642338377310965 1.3086370454181933; -0.6237617892634615 -1.5179773305727846; 1.523911577785339 -0.1897973780519804], bias = [-0.5465130224095108; -0.6415232773305236; -1.8544952620545587; -0.4680265047804734; 1.1368763014459187]), layer_2 = (weight = [0.12376415833635131 0.5976282708541546 -0.8881743065557622 -1.1591050508613434 -0.25284342524178427; 2.0656201734983606 1.4440180171847894 0.9356753982359111 1.8576049517374833 0.9871442440770988; -0.8069096950792849 -0.7790407419085087 -0.6264272874865515 -0.08727777223592115 -0.5969660964482135; 1.7281110815784764 1.0673078718364652 0.6142548005100602 1.7603324800093139 1.0611792212163953; 1.307155425536457 2.0090716491173044 1.7315241121597185 1.7247208586504215 1.6046595429544215], bias = [0.2523530085430899; 1.6052302609568787; -0.849801513237853; 1.8070626464615305; -0.10325025597845644]), layer_3 = (weight = [-0.7405831226452029 0.17012316882186057 0.325948183654489 -0.7703516708391075 1.084989132777383; 1.7597565115569025 1.93611543000045 1.5523286169185215 1.6874118424008855 0.7308363447680933; 0.953177488885703 0.5079633715580499 1.1426492034570124 1.3013546840682977 0.599886391707636; 0.8222600720131266 1.46351795870213 0.46252840054134947 0.31385389652957346 2.0147749572433136; 1.746504815591536 1.4500111280971937 1.156104223424472 1.504885947571245 1.1087962117562735], bias = [-0.2611212917982521; 1.3001892025668478; 0.3023587271577198; 0.5800854952329786; 1.615436123621225]), layer_4 = (weight = [0.0017050674089267661 -0.29077379246187257 0.006797856167955862 -0.003813275554236909 -1.1183038703779917; -0.8985411166986927 -0.5476497611743479 1.4250797666819106 0.7359261702101261 -1.4376148845900374], bias = [-0.0017380786259726926; -0.10251374553146454]))
 
-p=p_trained
+#p=p_trained
 
 
 
@@ -260,5 +260,32 @@ xlabel!("\\eta (dimensionless radius)")
 plot!(sol.t[end-20:end],_sol_node[1,end-20:end],color=:red,markeralpha=0.30,label="Forecasted \\phi")
 title!("Trained UDE")
 savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0_80points\\UDE\\Results\\NoNoise\\NeuralODEModel_finalversion.png")
+
+
+
+# Recovering the Guessed term by the UDE for the missing term in the CWDE
+Y_guessed = U(X̂,p_trained,st)[1]
+
+plot(sol.t[1:80],Y_guessed[2,:], label = "UDE Approximation", color =:black)
+
+
+Y_forecasted = U(_sol_node[:, end-20:end],p_trained,st)[1]
+
+plot!(sol.t[80:100], Y_forecasted[2,:], color = :cyan, label = "UDE Forecasted")
+
+function Y_term(psi, C)
+    return -((psi^2 - C)^(3/2))
+end
+
+
+
+Y_actual = [Y_term(psi, C) for psi in Array(sol[:,1:end])[1,:]]
+
+scatter!(sol.t, Y_actual,markeralpha=0.25, color =:orange,label = "Actual term: " * L"-\left(\varphi^2 - C\right)^{3/2}", legend = :right)
+
+
+title!("UDE missing term")
+xlabel!("\\eta (dimensionless radius)")
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0_80points\\UDE\\Results\\NoNoise\\Recoveredterm2_nonoise.png")
 
 
