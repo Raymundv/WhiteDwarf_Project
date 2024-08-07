@@ -10,7 +10,7 @@ using ComponentArrays
 using Optimization, OptimizationOptimJL,OptimizationOptimisers   
 using JLD
 using OptimizationFlux
-
+using LaTeXStrings
 using Statistics                                                                
 rng = Random.default_rng()
 Random.seed!(99)
@@ -207,6 +207,7 @@ _sol_node = solve(prob_node_extrapolate, Tsit5(),saveat = etasteps)
 #UDE Extrapolation scatter plot
 predicted_ude_plot = scatter(_sol_node, legend = :topright,markeralpha=0.5, label=["UDE \\phi" "UDE \\phi'"], title="UDE Extrapolation")
 #UDE trained against training data
+
 pl_trajectory = plot!(etasteps2, transpose(X̂), xlabel = "\\eta (dimensionless radius)", color = :red, label = ["UDE Approximation" nothing])
 
 
@@ -259,6 +260,43 @@ plot!(sol.t[1:end-10],predictude(p_trained, solutionarray[:,1], etasteps2)[1, :]
 xlabel!("\\eta (dimensionless radius)")
 
 plot!(sol.t[end-10:end],_sol_node[1,end-10:end],color=:red,markeralpha=0.30,label="Forecasted \\phi")
+
 title!("Trained UDE")
 savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0\\UDE\\Results\\NoNoise\\NeuralODEModel_finalversion.png")
 
+
+# Recovering the Guessed term by the UDE for the missing term in the CWDE
+Y_guessed = U(X̂,p_trained,st)[1]
+
+plot(sol.t[1:90],Y_guessed[2,:], label = "UDE Approximation", color =:black)
+
+#y_forecasted 
+Y_forecasted = U(_sol_node[:, end-10:end],p_trained,st)[1]
+
+plot!(sol.t[90:100], Y_forecasted[2,:], color = :cyan, label = "UDE Forecasted")
+
+#Y_scatter
+
+function Y_term(psi, C)
+    return -((psi^2 - C)^(3/2))
+end
+
+
+Y_actual = [Y_term(psi, C) for psi in Array(sol[:,1:end])[1,:]]
+
+scatter!(sol.t, Y_actual,markeralpha=0.30,color =:orange, label = "Actual term: " * L"-\left(\varphi^2 - C\right)^{3/2}", legend = :right)
+
+
+title!("UDE missing term")
+xlabel!("\\eta (dimensionless radius)")
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0\\UDE\\Results\\NoNoise\\Recoveredterm2_nonoise.png")
+
+
+
+
+plot(sol.t,Y[1,:], label = "Recovered term")
+plot!(sol.t, [0 for i in sol.t[:]] ,label = "Actual term")
+title!("Missing term UDE")
+xlabel!("\\eta (dimensionless radius)")
+
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf\\UDE\\Results\\Recoveredterm1_nonoise.png")
