@@ -10,7 +10,7 @@ using ComponentArrays
 using Optimization, OptimizationOptimJL,OptimizationOptimisers   
 using JLD
 using OptimizationFlux
-
+using LaTeXStrings
 using Statistics                                                                
 rng = Random.default_rng()
 Random.seed!(99)
@@ -173,11 +173,11 @@ savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf
 # Retrieving the best candidate after the BFGS training.
 p_trained = res1.minimizer
 
-
+p_trained = (layer_1 = (weight = [-1.567316271195498 -0.9216318933955566; -1.787292503457178 -0.6759406386557488; -0.6948343426553105 -0.4606772896221909; -2.2529477868387526 1.2214351198991988; -1.8678628735057883 -1.4683904157625742], bias = [-1.66385435414385; -1.7519604708403422; -1.6155886004415354; -1.6258139480569476; -1.2358590417683757]), layer_2 = (weight = [-1.2577146982545682 -0.6886468417225953 -2.2296825614802764 -1.6241713943766756 -1.3806466954583987; 2.106787908921441 1.4142801633102768 1.364842473555346 0.6464295506728144 1.9500866671569925; 1.211588400496942 1.427461371125084 -0.6322224289263189 0.6888368910955939 -0.14221225599731882; -0.7468674026845075 -0.06873937677288999 -0.6099932758781293 -0.20837492784033665 -0.4873153203685807; 0.4193302292982903 0.7733409309595426 -0.11620908447171212 0.05695189927426096 -0.07058877093245552], bias = [-1.0978714351152061; 1.4955956637014896; 0.19046756060855302; -0.19649180255284787; -0.21063014298132174]), layer_3 = (weight = [1.9238819615537468 1.5081552279569188 1.6857913153272854 2.102489150031562 1.062600073899889; -2.0775802195881328 -1.5616437576833242 -2.5821669237137974 -2.1897870856799075 -2.75393038562553; -2.920347665753938 -2.260786601118151 -1.865365792862753 -2.63266271642411 -2.9225201641932967; 1.839176241369884 0.8564540181954057 1.2384098663731784 1.059893843118218 1.9409821165077408; -0.9889823917105702 -1.5340086200913516 -1.5511629966592586 -1.5641214671299077 -1.4287503333442721], bias = [1.6035740673430354; -2.070902050430901; -2.0360506559737743; 1.2958467610133086; -1.439479423501944]), layer_4 = (weight = [-0.09288956951583764 -1.3926137511093306 -0.8317325507688428 0.4148214831055747 -0.5630208587764481; -0.45510074166063463 -1.3439348241423268 -0.948542004054094 -0.20214259722159883 -0.48427590211991206], bias = [-0.0019758379558647084; -0.548973815129146]))
 
 # defining the time span for the plot
 
-
+p = p_trained
 #Retrieving the Data predicted for the Lotka Volterra model, with the UDE with the trained parameters for the NN
 X̂ = predict_ude(p_trained)
 
@@ -194,7 +194,7 @@ savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf
 #----------------------------------------------------#
 function recovered_dynamics!(du,u,p,eta)
     phi, phiderivative = u
-    output, _ = U([phi,phiderivative],res1.minimizer,st)
+    output, _ = U([phi,phiderivative],p_trained,st)
     du[1] = output[1]+phiderivative
     du[2] = -2*phiderivative/eta+output[2]
 
@@ -279,5 +279,33 @@ xlabel!("\\eta (dimensionless radius)")
 plot!(sol.t[end-60:end],_sol_node[1,end-60:end],color=:red,markeralpha=0.30,label="Forecasted \\phi")
 title!("Trained UDE")
 savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0_40points\\UDE\\Results\\HighNoise\\NeuralODEModel_finalversion.png")
+
+
+# Recovering the Guessed term by the UDE for the missing term in the CWDE
+Y_guessed = U(X̂,p_trained,st)[1]
+
+plot(sol.t[1:40],Y_guessed[2,:], label = "UDE Approximation", color =:black)
+
+
+Y_forecasted = U(_sol_node[:, end-60:end],p_trained,st)[1]
+
+plot!(sol.t[40:100], Y_forecasted[2,:], color = :cyan, label = "UDE Forecasted")
+
+function Y_term(psi, C)
+    return -((psi^2 - C)^(3/2))
+end
+
+
+
+Y_actual = [Y_term(psi, C) for psi in Array(sol[:,1:end])[1,:]]
+
+scatter!(sol.t, Y_actual,markeralpha=0.30, color =:orange,label = "Actual term: " * L"-\left(\varphi^2 - C\right)^{3/2}", legend = :bottomright)
+
+
+title!("UDE missing term")
+xlabel!("\\eta (dimensionless radius)")
+savefig("C:\\Users\\Raymundoneo\\Documents\\SciML Workshop\\bootcamp\\WhiteDwarf_Forecasting_from0_40points\\UDE\\Results\\HighNoise\\Recoveredterm2_nonoise.png")
+
+
 
 
