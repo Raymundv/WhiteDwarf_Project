@@ -225,7 +225,7 @@ end
 
 Y_actual = [Y_term(psi, C) for psi in Array(sol[:,1:end])[1,:]]
 
-scatter!(sol.t, Y_actual,markeralpha=0.35, label = "Actual term: " * L"-\left(\varphi^2 - C\right)^{3/2}", legend = :right)
+scatter!(sol.t, Y_actual,markeralpha=0.35, label = "Actual term: " * L"-\left(\varphi^2 - C\right)^{3/2}")
 
 title!("UDE missing term")
 xlabel!("\\eta (dimensionless radius)")
