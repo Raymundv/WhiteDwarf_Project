@@ -1,0 +1,4 @@
+Loss,                       noise,  ADAM-Learning rate, BFGS-Learning rate, Iterations ADAM, Iterations BFGS 
+2.7694999610436222e-11, null, 0.2,0.01, 300,1000
+0.017887304919527783, moderate, 0.2,0.001, 300,1500
+0.20057570378189338 , high, 0.2,0.1, 300,200

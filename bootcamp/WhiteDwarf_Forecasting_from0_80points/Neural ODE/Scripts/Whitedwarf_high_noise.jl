@@ -146,7 +146,7 @@ result_neuralode = Optimization.solve(optprob, OptimizationOptimisers.Adam(0.1);
 optprob2 = remake(optprob; u0 = result_neuralode.u)
 
 result_neuralode2 = Optimization.solve(optprob2, Optim.BFGS(; initial_stepnorm = 0.01);
-    callback, allow_f_increases = false, maxiters=100)
+    callback, allow_f_increases = false, maxiters=150)
 
 callback = function (p, l, pred; doplot = true)
     println(l)
